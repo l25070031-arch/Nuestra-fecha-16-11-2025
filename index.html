@@ -3,303 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Para mi Pichuchis ❤️ 16-11-2025</title>
+    <title>Nuestro 16 ❤️ Pichuchis</title>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Pacifico&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <style>
-        :root {
-            --pink-soft: #fff0f3;
-            --pink-hot: #fb6f92;
-            --pink-accent: #ffb3c1;
-            --text: #5e414d;
-        }
+        :root { --pink: #fb6f92; --soft: #fff0f3; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Quicksand', sans-serif; }
+        body { background: var(--soft); overflow: hidden; height: 100vh; color: #5e414d; }
+        
+        /* Fondo */
+        #bg { position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Quicksand', sans-serif;
-            background-color: var(--pink-soft);
-            color: var(--text);
-            overflow: hidden;
-        }
-
-        canvas { position: fixed; top: 0; left: 0; z-index: -1; }
-
-        /* --- NAVEGACIÓN --- */
+        /* Menú Inferior */
         nav {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 12px 25px;
-            border-radius: 50px;
-            display: flex;
-            gap: 20px;
-            z-index: 1000;
-            box-shadow: 0 10px 30px rgba(251, 111, 146, 0.3);
-            backdrop-filter: blur(10px);
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: white; padding: 10px 20px; border-radius: 50px;
+            display: flex; gap: 15px; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
+        nav button { background: none; border: none; color: var(--pink); font-weight: 700; cursor: pointer; font-size: 0.7rem; }
 
-        nav button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-family: 'Quicksand';
-            font-weight: 700;
-            color: var(--pink-hot);
-            font-size: 0.85rem;
-            transition: 0.3s;
+        /* Ventanas */
+        .page {
+            position: absolute; width: 100%; height: 100vh; 
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; text-align: center;
         }
+        .page.active { display: flex; animation: fade 0.5s ease; }
+        @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
-        nav button:hover { transform: translateY(-5px); color: #ff8fab; }
+        /* Reloj */
+        .timer { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(251,111,146,0.2); }
+        .grid { display: flex; gap: 15px; }
+        .num { font-size: 2rem; font-weight: 700; color: var(--pink); display: block; }
+        .label { font-size: 0.6rem; color: #888; }
 
-        /* --- SISTEMA DE VENTANAS --- */
-        .window {
-            position: absolute;
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1);
-            visibility: hidden;
+        /* Fotos Polaroid */
+        .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; overflow-y: auto; max-height: 55vh; width: 100%; }
+        .polaroid { 
+            background: white; padding: 10px 10px 30px 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            width: 140px; transform: rotate(var(--r)); margin: 10px;
         }
+        .polaroid img { width: 100%; height: 120px; object-fit: cover; }
 
-        .active { visibility: visible; }
-
-        /* --- FRASE CENTRAL CURSI --- */
-        .pichuchis-text {
-            font-family: 'Dancing Script', cursive;
-            font-size: 4.5rem;
-            color: var(--pink-hot);
-            text-shadow: 3px 3px 0px rgba(255, 255, 255, 1), 0 0 20px rgba(251, 111, 146, 0.4);
-            margin: 20px 0;
-            animation: floatText 3s ease-in-out infinite;
-        }
-
-        @keyframes floatText {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
-
-        /* --- CONTADOR --- */
-        .timer-card {
-            background: white;
-            padding: 25px;
-            border-radius: 40px;
-            box-shadow: 0 15px 40px rgba(251, 111, 146, 0.1);
-            border: 2px solid white;
-        }
-        .timer-grid { display: flex; gap: 15px; margin-top: 10px; }
-        .val { font-size: 2.2rem; font-weight: 700; color: var(--pink-hot); line-height: 1; }
-        .lab { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* --- CALENDARIO NOVIEMBRE 2025 --- */
-        .cal-box {
-            background: white;
-            padding: 25px;
-            border-radius: 35px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            max-width: 320px;
-        }
-        .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 10px; }
-        .day { padding: 10px; font-size: 0.9rem; border-radius: 50%; text-align: center; }
-        .special-16 { 
-            background: var(--pink-hot); 
-            color: white; 
-            font-weight: 700; 
-            box-shadow: 0 0 15px var(--pink-hot);
-            position: relative;
-        }
-        .special-16::after { content: '❤️'; position: absolute; top: -10px; right: -5px; font-size: 12px; }
-
-        /* --- MÚSICA Y FOTOS --- */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.7);
-            padding: 30px;
-            border-radius: 30px;
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid white;
-        }
-        .scroll-list {
-            max-height: 150px;
-            overflow-y: auto;
-            margin-top: 15px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 15px;
-        }
-        .item-row { padding: 10px; border-bottom: 1px solid white; cursor: pointer; font-size: 0.85rem; text-align: left; }
-        .item-row:hover { color: var(--pink-hot); background: white; }
-
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 15px;
-            width: 100%;
-            max-height: 60vh;
-            overflow-y: auto;
-            padding: 10px;
-        }
-        .pic { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; border: 3px solid white; }
-
-        .btn-curi {
-            background: var(--pink-hot);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 700;
-            margin: 10px 0;
-        }
+        /* Botones */
+        .btn { background: var(--pink); color: white; border: none; padding: 12px 25px; border-radius: 50px; font-weight: 700; cursor: pointer; margin: 10px; }
+        .playlist { background: white; width: 100%; max-width: 300px; border-radius: 15px; max-height: 150px; overflow-y: auto; margin-top: 10px; }
+        .song { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.8rem; }
     </style>
 </head>
-<body>
+<body onclick="pop(event)">
 
-    <canvas id="bg-canvas"></canvas>
+    <canvas id="bg"></canvas>
 
     <nav>
-        <button onclick="changeWin(0)">🏠 Inicio</button>
-        <button onclick="changeWin(1)">📅 El 16</button>
-        <button onclick="changeWin(2)">🎵 Música</button>
-        <button onclick="changeWin(3)">📸 Fotos</button>
+        <button onclick="show(0)">INICIO</button>
+        <button onclick="show(1)">MÚSICA</button>
+        <button onclick="show(2)">ÁLBUM</button>
     </nav>
 
-    <div class="window active" id="win0">
-        <p style="text-transform: uppercase; letter-spacing: 3px; font-size: 0.8rem;">Desde el 16-11-2025</p>
-        <h2 class="pichuchis-text">Te amo Pichuchis</h2>
-        
-        <div class="timer-card">
-            <div class="timer-grid">
-                <div class="unit"><span class="val" id="d">0</span><span class="lab">Días</span></div>
-                <div class="unit"><span class="val" id="h">0</span><span class="lab">Hrs</span></div>
-                <div class="unit"><span class="val" id="m">0</span><span class="lab">Min</span></div>
-                <div class="unit"><span class="val" id="s">0</span><span class="lab">Seg</span></div>
+    <div class="page active" id="p0">
+        <h1 style="font-family:'Dancing Script'; font-size: 4rem; color: var(--pink);">Te amo Pichuchis</h1>
+        <div class="timer">
+            <div class="grid">
+                <div><span class="num" id="d">0</span><span class="label">DÍAS</span></div>
+                <div><span class="num" id="h">0</span><span class="label">HRS</span></div>
+                <div><span class="num" id="m">0</span><span class="label">MIN</span></div>
+                <div><span class="num" id="s">0</span><span class="label">SEG</span></div>
             </div>
         </div>
-        <p style="margin-top: 20px; font-style: italic; color: #8a6d78;">Eres mi persona favorita en el universo.</p>
+        <p style="margin-top:20px; font-size:0.8rem; font-weight:700;">DESDE EL 16-11-2025 ❤️</p>
     </div>
 
-    <div class="window" id="win1" style="transform: translateY(100%);">
-        <h2 style="font-family:'Pacifico'; color: var(--pink-hot); margin-bottom: 20px;">Nuestra fecha especial</h2>
-        <div class="cal-box">
-            <div style="font-weight: 700; text-align: center; color: var(--pink-hot);">Noviembre 2025</div>
-            <div class="days">
-                <div class="lab" style="font-weight:700">D</div><div class="lab" style="font-weight:700">L</div><div class="lab" style="font-weight:700">M</div><div class="lab" style="font-weight:700">M</div><div class="lab" style="font-weight:700">J</div><div class="lab" style="font-weight:700">V</div><div class="lab" style="font-weight:700">S</div>
-                <div></div><div></div><div></div><div></div><div></div><div></div>
-                <script>
-                    for(let i=1; i<=30; i++) {
-                        document.write(`<div class="day ${i===16 ? 'special-16' : ''}">${i}</div>`);
-                    }
-                </script>
-            </div>
-        </div>
-        <p style="max-width: 400px; text-align: center; margin-top: 20px; font-size: 0.9rem;">
-            "Cada 16 me recuerda lo afortunado que soy de tenerte. El 16-11-2025 cambió mi vida para siempre."
-        </p>
+    <div class="page" id="p1">
+        <h2 style="font-family:'Pacifico'; color:var(--pink);">Nuestras Canciones</h2>
+        <audio id="player" controls style="margin:20px;"></audio>
+        <button class="btn" onclick="document.getElementById('m-in').click()">AÑADIR MÚSICA</button>
+        <input type="file" id="m-in" accept="audio/*" style="display:none">
+        <div class="playlist" id="songs"></div>
     </div>
 
-    <div class="window" id="win2" style="transform: translateY(100%);">
-        <div class="glass-panel">
-            <h2 style="font-family:'Pacifico'; color: var(--pink-hot);">Playlist para Pichuchis 🎵</h2>
-            <audio id="player" controls style="width: 100%; margin: 20px 0;"></audio>
-            <input type="file" id="music-input" accept="audio/*" multiple style="display:none">
-            <button class="btn-curi" onclick="document.getElementById('music-input').click()">Añadir nuestras canciones</button>
-            <div class="scroll-list" id="track-list"></div>
-        </div>
-    </div>
-
-    <div class="window" id="win3" style="transform: translateY(100%);">
-        <div class="glass-panel" style="max-width: 700px;">
-            <h2 style="font-family:'Pacifico'; color: var(--pink-hot); margin-bottom: 10px;">Nuestros Recuerdos 📸</h2>
-            <input type="file" id="photo-input" accept="image/*" style="display:none">
-            <button class="btn-curi" onclick="document.getElementById('photo-input').click()">Subir una foto nueva</button>
-            <div class="gallery-grid" id="photo-grid"></div>
-        </div>
+    <div class="page" id="p2">
+        <button class="btn" onclick="document.getElementById('p-in').click()">SUBIR FOTO 📸</button>
+        <input type="file" id="p-in" accept="image/*" style="display:none">
+        <div class="gallery" id="album"></div>
     </div>
 
     <script>
-        // --- NAVEGACIÓN ---
-        const windows = document.querySelectorAll('.window');
-        function changeWin(idx) {
-            windows.forEach((win, i) => {
-                win.classList.remove('active');
-                if (i === idx) {
-                    win.style.transform = "translateY(0)";
-                    win.classList.add('active');
-                } else if (i < idx) {
-                    win.style.transform = "translateY(-100%)";
-                } else {
-                    win.style.transform = "translateY(100%)";
-                }
-            });
-        }
+        // --- 1. CONFIGURACIÓN FIREBASE (Pon tus datos aquí para que ella lo vea) ---
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            databaseURL: "TU_DATABASE_URL",
+            projectId: "TU_PROJECT_ID"
+        };
+        
+        let db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+        } catch(e) { console.log("Firebase pendiente de configurar"); }
 
-        // --- CONTADOR ETERNO ---
-        const startDate = new Date('2025-11-16T00:00:00');
-        function updateCounter() {
-            const now = new Date();
-            const diff = now - startDate;
+        // --- 2. RELOJ (INCORRECTIBLE) ---
+        const start = new Date('2025-11-16T00:00:00').getTime();
+        function updateTime() {
+            const now = Date.now();
+            const diff = now - start;
             document.getElementById('d').innerText = Math.floor(diff / 86400000);
             document.getElementById('h').innerText = Math.floor((diff / 3600000) % 24).toString().padStart(2,'0');
             document.getElementById('m').innerText = Math.floor((diff / 60000) % 60).toString().padStart(2,'0');
             document.getElementById('s').innerText = Math.floor((diff / 1000) % 60).toString().padStart(2,'0');
         }
-        setInterval(updateCounter, 1000);
-        updateCounter();
+        setInterval(updateTime, 1000);
+        updateTime();
 
-        // --- LÓGICA MÚSICA ---
-        const player = document.getElementById('player');
-        const musicIn = document.getElementById('music-input');
-        const trackList = document.getElementById('track-list');
-        musicIn.onchange = (e) => {
-            Array.from(e.target.files).forEach(file => {
-                const url = URL.createObjectURL(file);
-                const row = document.createElement('div');
-                row.className = 'item-row';
-                row.innerText = "❤️ " + file.name;
-                row.onclick = () => { player.src = url; player.play(); };
-                trackList.appendChild(row);
-            });
-        };
+        // --- 3. NAVEGACIÓN ---
+        function show(i) {
+            document.querySelectorAll('.page').forEach((p, idx) => p.classList.toggle('active', i === idx));
+        }
 
-        // --- LÓGICA FOTOS ---
-        const photoIn = document.getElementById('photo-input');
-        const photoGrid = document.getElementById('photo-grid');
-        photoIn.onchange = (e) => {
+        // --- 4. FUNCIONES DE CARGA ---
+        const album = document.getElementById('album');
+        const songs = document.getElementById('songs');
+
+        function renderFoto(data) {
+            const div = document.createElement('div');
+            div.className = 'polaroid';
+            div.style.setProperty('--r', (Math.random()*10-5)+'deg');
+            div.innerHTML = `<img src="${data.img}"><p style="font-family:'Dancing Script'; font-size:0.8rem; margin-top:5px;">Pichuchis ❤️</p>`;
+            album.prepend(div);
+        }
+
+        function renderMusica(data) {
+            const d = document.createElement('div'); d.className = 'song'; d.innerText = "🎵 " + data.name;
+            d.onclick = () => { const a = document.getElementById('player'); a.src = data.src; a.play(); };
+            songs.prepend(d);
+        }
+
+        document.getElementById('p-in').onchange = (e) => {
             const reader = new FileReader();
             reader.onload = (ev) => {
-                const img = document.createElement('img');
-                img.src = ev.target.result;
-                img.className = 'pic';
-                photoGrid.appendChild(img);
+                const item = { img: ev.target.result };
+                if(db) db.ref('fotos').push(item);
+                else renderFoto(item);
             };
             reader.readAsDataURL(e.target.files[0]);
         };
 
-        // --- FONDO ANIMADO ---
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        let hearts = Array.from({length: 40}, () => ({
-            x: Math.random()*canvas.width, y: Math.random()*canvas.height,
-            size: Math.random()*4+2, speed: Math.random()*0.4+0.1
-        }));
+        document.getElementById('m-in').onchange = (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const item = { name: file.name, src: ev.target.result };
+                if(db) db.ref('musica').push(item);
+                else renderMusica(item);
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // Escuchar cambios de Firebase para que tu novia lo vea
+        if(db) {
+            db.ref('fotos').on('child_added', snap => renderFoto(snap.val()));
+            db.ref('musica').on('child_added', snap => renderMusica(snap.val()));
+        }
+
+        // --- 5. EFECTOS VISUALES ---
+        function pop(e) {
+            const h = document.createElement('div');
+            h.innerHTML = '❤️'; h.style.position = 'fixed'; h.style.left = e.clientX+'px'; h.style.top = e.clientY+'px';
+            h.style.pointerEvents = 'none'; document.body.appendChild(h);
+            h.animate([{transform:'scale(1)', opacity:1}, {transform:'translateY(-100px) scale(2)', opacity:0}], 1000).onfinish = () => h.remove();
+        }
+
+        const canv = document.getElementById('bg'); const ctx = canv.getContext('2d');
+        canv.width = window.innerWidth; canv.height = window.innerHeight;
+        let pts = Array.from({length:30}, () => ({x:Math.random()*canv.width, y:Math.random()*canv.height, s:Math.random()*0.5+0.2}));
         function draw() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = 'rgba(251, 111, 146, 0.3)';
-            hearts.forEach(h => {
-                ctx.beginPath(); ctx.arc(h.x, h.y, h.size, 0, Math.PI*2); ctx.fill();
-                h.y -= h.speed; if(h.y < -10) h.y = canvas.height + 10;
-            });
+            ctx.clearRect(0,0,canv.width,canv.height); ctx.fillStyle = 'rgba(251, 111, 146, 0.2)';
+            pts.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, 7); ctx.fill(); p.y-=p.s; if(p.y<-5) p.y=canv.height+5; });
             requestAnimationFrame(draw);
         }
         draw();
     </script>
 </body>
 </html>
+
