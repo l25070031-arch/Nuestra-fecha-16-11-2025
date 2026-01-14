@@ -6,55 +6,57 @@
     <title>Nuestro 16 ❤️ Pichuchis</title>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Pacifico&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
     
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
     <style>
-        :root { --pink: #fb6f92; --soft: #fff0f3; }
+        :root { --pink: #fb6f92; --soft: #fff0f3; --dark-pink: #ff4d6d; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Quicksand', sans-serif; }
-        body { background: var(--soft); overflow: hidden; height: 100vh; color: #5e414d; }
         
-        /* Fondo */
-        #bg { position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%; }
+        body { 
+            background: var(--soft); 
+            overflow: hidden; 
+            height: 100vh; 
+            color: #5e414d;
+            background-image: linear-gradient(rgba(255,240,243,0.8), rgba(255,240,243,0.8)), url('https://w0.peakpx.com/wallpaper/599/238/HD-wallpaper-snoopy-love-dog-heart-pink-thumbnail.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        #bg { position: fixed; top: 0; left: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
 
-        /* Menú Inferior */
         nav {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: white; padding: 10px 20px; border-radius: 50px;
+            background: rgba(255, 255, 255, 0.9); padding: 10px 20px; border-radius: 50px;
             display: flex; gap: 15px; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 2px solid var(--pink);
         }
-        nav button { background: none; border: none; color: var(--pink); font-weight: 700; cursor: pointer; font-size: 0.7rem; }
+        nav button { background: none; border: none; color: var(--pink); font-weight: 700; cursor: pointer; font-size: 0.8rem; }
 
-        /* Ventanas */
         .page {
-            position: absolute; width: 100%; height: 100vh; 
+            position: absolute; width: 100%; height: 100vh; z-index: 10;
             display: none; flex-direction: column; align-items: center; justify-content: center;
             padding: 20px; text-align: center;
         }
         .page.active { display: flex; animation: fade 0.5s ease; }
         @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Reloj */
-        .timer { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(251,111,146,0.2); }
+        .timer { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(251,111,146,0.3); border: 2px dashed var(--pink); }
         .grid { display: flex; gap: 15px; }
-        .num { font-size: 2rem; font-weight: 700; color: var(--pink); display: block; }
-        .label { font-size: 0.6rem; color: #888; }
+        .num { font-size: 2.2rem; font-weight: 700; color: var(--pink); display: block; }
+        .label { font-size: 0.7rem; color: #888; letter-spacing: 1px; }
 
-        /* Fotos Polaroid */
-        .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; overflow-y: auto; max-height: 55vh; width: 100%; }
         .polaroid { 
             background: white; padding: 10px 10px 30px 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
-            width: 140px; transform: rotate(var(--r)); margin: 10px;
+            width: 150px; transform: rotate(var(--r)); margin: 10px; border: 1px solid #eee;
         }
-        .polaroid img { width: 100%; height: 120px; object-fit: cover; }
+        .polaroid img { width: 100%; height: 130px; object-fit: cover; }
 
-        /* Botones */
-        .btn { background: var(--pink); color: white; border: none; padding: 12px 25px; border-radius: 50px; font-weight: 700; cursor: pointer; margin: 10px; }
-        .playlist { background: white; width: 100%; max-width: 300px; border-radius: 15px; max-height: 150px; overflow-y: auto; margin-top: 10px; }
-        .song { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.8rem; }
+        .btn { background: var(--pink); color: white; border: none; padding: 12px 25px; border-radius: 50px; font-weight: 700; cursor: pointer; margin: 10px; transition: 0.3s; }
+        .btn:hover { background: var(--dark-pink); transform: scale(1.05); }
+
+        .playlist { background: rgba(255,255,255,0.8); width: 100%; max-width: 300px; border-radius: 15px; max-height: 200px; overflow-y: auto; margin-top: 10px; border: 1px solid var(--pink); }
+        .song { padding: 10px; border-bottom: 1px solid #ffccd5; cursor: pointer; font-size: 0.9rem; color: #d63384; }
     </style>
 </head>
-<body onclick="pop(event)">
+<body onclick="window.pop ? window.pop(event) : null">
 
     <canvas id="bg"></canvas>
 
@@ -65,7 +67,7 @@
     </nav>
 
     <div class="page active" id="p0">
-        <h1 style="font-family:'Dancing Script'; font-size: 4rem; color: var(--pink);">Te amo Pichuchis</h1>
+        <h1 style="font-family:'Dancing Script'; font-size: 4.5rem; color: var(--dark-pink); text-shadow: 2px 2px white;">Te amo Pichuchis</h1>
         <div class="timer">
             <div class="grid">
                 <div><span class="num" id="d">0</span><span class="label">DÍAS</span></div>
@@ -74,118 +76,141 @@
                 <div><span class="num" id="s">0</span><span class="label">SEG</span></div>
             </div>
         </div>
-        <p style="margin-top:20px; font-size:0.8rem; font-weight:700;">DESDE EL 16-11-2025 ❤️</p>
+        <p style="margin-top:20px; font-size:0.9rem; font-weight:700; color: var(--dark-pink); background: white; padding: 5px 15px; border-radius: 20px;">DESDE EL 16-11-2025 ❤️</p>
     </div>
 
     <div class="page" id="p1">
-        <h2 style="font-family:'Pacifico'; color:var(--pink);">Nuestras Canciones</h2>
-        <audio id="player" controls style="margin:20px;"></audio>
-        <button class="btn" onclick="document.getElementById('m-in').click()">AÑADIR MÚSICA</button>
+        <h2 style="font-family:'Pacifico'; color:var(--dark-pink); font-size: 2rem;">Nuestra Playlist</h2>
+        <audio id="player" controls style="margin:20px; filter: sepia(20%) hue-rotate(300deg);"></audio>
+        <button class="btn" id="btn-music">AÑADIR CANCIÓN 🎵</button>
         <input type="file" id="m-in" accept="audio/*" style="display:none">
         <div class="playlist" id="songs"></div>
     </div>
 
     <div class="page" id="p2">
-        <button class="btn" onclick="document.getElementById('p-in').click()">SUBIR FOTO 📸</button>
+        <button class="btn" id="btn-photo">SUBIR NUESTRO RECUERDO 📸</button>
         <input type="file" id="p-in" accept="image/*" style="display:none">
-        <div class="gallery" id="album"></div>
+        <div class="gallery" id="album" style="display: flex; flex-wrap: wrap; justify-content: center; overflow-y: auto; max-height: 60vh;"></div>
     </div>
 
-    <script>
-        // --- 1. CONFIGURACIÓN FIREBASE (Pon tus datos aquí para que ella lo vea) ---
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
         const firebaseConfig = {
-            apiKey: "TU_API_KEY",
-            databaseURL: "TU_DATABASE_URL",
-            projectId: "TU_PROJECT_ID"
+            apiKey: "AIzaSyAFji82Fx43sym6svAkE7u5ZKf7irC2UrE",
+            authDomain: "nuestra-fecha-16-11-2025.firebaseapp.com",
+            databaseURL: "https://nuestra-fecha-16-11-2025-default-rtdb.firebaseio.com/", 
+            projectId: "nuestra-fecha-16-11-2025",
+            storageBucket: "nuestra-fecha-16-11-2025.firebasestorage.app",
+            messagingSenderId: "443902042832",
+            appId: "1:443902042832:web:028ca83ab6ab87f8ef34d5",
+            measurementId: "G-PG6MC909HX"
         };
         
-        let db;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
-        } catch(e) { console.log("Firebase pendiente de configurar"); }
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        // --- 2. RELOJ (INCORRECTIBLE) ---
         const start = new Date('2025-11-16T00:00:00').getTime();
-        function updateTime() {
-            const now = Date.now();
-            const diff = now - start;
+        setInterval(() => {
+            const diff = Date.now() - start;
             document.getElementById('d').innerText = Math.floor(diff / 86400000);
             document.getElementById('h').innerText = Math.floor((diff / 3600000) % 24).toString().padStart(2,'0');
             document.getElementById('m').innerText = Math.floor((diff / 60000) % 60).toString().padStart(2,'0');
             document.getElementById('s').innerText = Math.floor((diff / 1000) % 60).toString().padStart(2,'0');
-        }
-        setInterval(updateTime, 1000);
-        updateTime();
+        }, 1000);
 
-        // --- 3. NAVEGACIÓN ---
-        function show(i) {
+        window.show = (i) => {
             document.querySelectorAll('.page').forEach((p, idx) => p.classList.toggle('active', i === idx));
-        }
+        };
 
-        // --- 4. FUNCIONES DE CARGA ---
         const album = document.getElementById('album');
         const songs = document.getElementById('songs');
 
-        function renderFoto(data) {
-            const div = document.createElement('div');
-            div.className = 'polaroid';
-            div.style.setProperty('--r', (Math.random()*10-5)+'deg');
-            div.innerHTML = `<img src="${data.img}"><p style="font-family:'Dancing Script'; font-size:0.8rem; margin-top:5px;">Pichuchis ❤️</p>`;
-            album.prepend(div);
-        }
-
-        function renderMusica(data) {
-            const d = document.createElement('div'); d.className = 'song'; d.innerText = "🎵 " + data.name;
-            d.onclick = () => { const a = document.getElementById('player'); a.src = data.src; a.play(); };
-            songs.prepend(d);
-        }
+        document.getElementById('btn-photo').onclick = () => document.getElementById('p-in').click();
+        document.getElementById('btn-music').onclick = () => document.getElementById('m-in').click();
 
         document.getElementById('p-in').onchange = (e) => {
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                const item = { img: ev.target.result };
-                if(db) db.ref('fotos').push(item);
-                else renderFoto(item);
-            };
+            reader.onload = (ev) => push(ref(db, 'fotos'), { img: ev.target.result });
             reader.readAsDataURL(e.target.files[0]);
         };
 
         document.getElementById('m-in').onchange = (e) => {
             const file = e.target.files[0];
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                const item = { name: file.name, src: ev.target.result };
-                if(db) db.ref('musica').push(item);
-                else renderMusica(item);
-            };
+            reader.onload = (ev) => push(ref(db, 'musica'), { name: file.name, src: ev.target.result });
             reader.readAsDataURL(file);
         };
 
-        // Escuchar cambios de Firebase para que tu novia lo vea
-        if(db) {
-            db.ref('fotos').on('child_added', snap => renderFoto(snap.val()));
-            db.ref('musica').on('child_added', snap => renderMusica(snap.val()));
+        onChildAdded(ref(db, 'fotos'), (snap) => {
+            const data = snap.val();
+            const div = document.createElement('div');
+            div.className = 'polaroid';
+            div.style.setProperty('--r', (Math.random()*10-5)+'deg');
+            div.innerHTML = `<img src="${data.img}"><p style="font-family:'Dancing Script'; font-size:1rem; margin-top:5px; color: #5e414d;">Pichuchis ❤️</p>`;
+            album.prepend(div);
+        });
+
+        onChildAdded(ref(db, 'musica'), (snap) => {
+            const data = snap.val();
+            const d = document.createElement('div'); d.className = 'song'; d.innerText = "🎵 " + data.name;
+            d.onclick = () => { const a = document.getElementById('player'); a.src = data.src; a.play(); };
+            songs.prepend(d);
+        });
+
+        // --- LLUVIA CURSIVA ACTUALIZADA CON NOVIEMBRE Y 2025 ---
+        const canv = document.getElementById('bg');
+        const ctx = canv.getContext('2d');
+        canv.width = window.innerWidth;
+        canv.height = window.innerHeight;
+
+        let particles = [];
+        // Palabras actualizadas aquí
+        const words = ["Love", "Pichuchis", "❤️", "Noviembre", "2025", "16"];
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canv.width;
+                this.y = Math.random() * -canv.height;
+                this.speed = Math.random() * 1.5 + 1;
+                this.text = words[Math.floor(Math.random() * words.length)];
+                this.opacity = Math.random() * 0.5 + 0.2;
+                this.fontSize = Math.random() * 15 + 12;
+            }
+            update() {
+                this.y += this.speed;
+                this.x += Math.sin(this.y / 60);
+                if (this.y > canv.height) this.reset();
+            }
+            draw() {
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = "#fb6f92";
+                ctx.font = `italic ${this.fontSize}px 'Dancing Script'`;
+                ctx.fillText(this.text, this.x, this.y);
+            }
         }
 
-        // --- 5. EFECTOS VISUALES ---
-        function pop(e) {
+        for (let i = 0; i < 45; i++) particles.push(new Particle());
+
+        function animate() {
+            ctx.clearRect(0, 0, canv.width, canv.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        window.pop = (e) => {
             const h = document.createElement('div');
-            h.innerHTML = '❤️'; h.style.position = 'fixed'; h.style.left = e.clientX+'px'; h.style.top = e.clientY+'px';
-            h.style.pointerEvents = 'none'; document.body.appendChild(h);
-            h.animate([{transform:'scale(1)', opacity:1}, {transform:'translateY(-100px) scale(2)', opacity:0}], 1000).onfinish = () => h.remove();
-        }
+            h.innerHTML = '🌸'; h.style.position = 'fixed'; h.style.left = e.clientX+'px'; h.style.top = e.clientY+'px';
+            h.style.fontSize = '24px'; h.style.pointerEvents = 'none'; h.style.zIndex = '999'; document.body.appendChild(h);
+            h.animate([{transform:'scale(1) rotate(0deg)', opacity:1}, {transform:'translateY(-120px) scale(2) rotate(180deg)', opacity:0}], 1000).onfinish = () => h.remove();
+        };
 
-        const canv = document.getElementById('bg'); const ctx = canv.getContext('2d');
-        canv.width = window.innerWidth; canv.height = window.innerHeight;
-        let pts = Array.from({length:30}, () => ({x:Math.random()*canv.width, y:Math.random()*canv.height, s:Math.random()*0.5+0.2}));
-        function draw() {
-            ctx.clearRect(0,0,canv.width,canv.height); ctx.fillStyle = 'rgba(251, 111, 146, 0.2)';
-            pts.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, 7); ctx.fill(); p.y-=p.s; if(p.y<-5) p.y=canv.height+5; });
-            requestAnimationFrame(draw);
-        }
-        draw();
+        window.addEventListener('resize', () => {
+            canv.width = window.innerWidth; canv.height = window.innerHeight;
+        });
     </script>
 </body>
 </html>
-
