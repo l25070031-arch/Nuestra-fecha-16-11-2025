@@ -231,7 +231,7 @@
         onChildAdded(ref(db, 'fotos'), (snap) => {
             const div = document.createElement('div'); div.className = 'polaroid';
             div.style.setProperty('--r', (Math.random()*10-5)+'deg');
-            div.innerHTML = `<img src="${snap.val().img}"><p style="font-size:0.7rem; text-align:center;">Recuerdo ❤️</p>`;
+            div.innerHTML = `<img src="${snap.val().img}"><p style="font-size:0.7rem; text-align:center;">Recuerdos que las llevo tatuado en el alma como llevo llevo la fecha 16-11-2025, Te amooo mi Pichuchis ❤️</p>`;
             document.getElementById('album').prepend(div);
         });
 
@@ -273,4 +273,5 @@
     </script>
 </body>
 </html>
+
 
