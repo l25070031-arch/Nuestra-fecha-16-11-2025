@@ -49,20 +49,19 @@
         .label { font-size: 0.6rem; color: #ccc; }
 
         .msg-box { background: rgba(255,255,255,0.1); border: 1px solid var(--pink); padding: 15px; border-radius: 15px; width: 300px; margin-top: 20px; }
-        textarea, input[type="text"] { width: 100%; background: transparent; border: none; color: white; resize: none; border-bottom: 1px solid var(--pink); margin-bottom: 10px; padding: 5px; outline: none; }
+        textarea { width: 100%; background: transparent; border: none; color: white; resize: none; border-bottom: 1px solid var(--pink); margin-bottom: 10px; padding: 5px; outline: none; }
         
         .polaroid { 
             background: white; padding: 8px 8px 25px 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
             width: 130px; transform: rotate(var(--r)); margin: 10px; color: #333;
-            display: inline-block; vertical-align: top;
             transition: transform 0.3s;
         }
-        .polaroid:hover { transform: scale(1.2) rotate(0deg) !important; z-index: 100; }
+        .polaroid:hover { transform: scale(1.1) rotate(0deg) !important; z-index: 50; }
         .polaroid img { width: 100%; height: 110px; object-fit: cover; }
 
         .btn { background: var(--pink); color: white; border: none; padding: 10px 20px; border-radius: 50px; cursor: pointer; font-weight: 700; }
         .btn:disabled { background: #555; cursor: wait; }
-        
+
         @keyframes fade { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
         .heart { position: absolute; pointer-events: none; animation: floatUp 1.5s forwards; z-index: 1000; }
         @keyframes floatUp { to { transform: translateY(-100px) scale(0); opacity: 0; } }
@@ -74,14 +73,14 @@
     <canvas id="windCanvas"></canvas>
 
     <nav>
-        <button onclick="show(0)">VIENTO</button>
+        <button onclick="show(0)">INICIO</button>
         <button onclick="show(1)">ÁLBUM</button>
         <button onclick="show(2)">DEDICATORIA</button>
-        <button onclick="show(3)">PLAYLIST</button>
+        <button onclick="show(3)">MÚSICA</button>
     </nav>
 
     <div class="page active" id="p0">
-        <h1 style="font-family:'Cinzel'; letter-spacing: 10px; font-size: 3rem; margin-bottom: 10px;">PICHUCHIS</h1>
+        <h1 style="font-family:'Cinzel'; letter-spacing: 10px; font-size: 3rem; margin-bottom: 10px;">TE AMO PICHUCHIS</h1>
         <div class="timer">
             <div class="grid">
                 <div><span class="num" id="d">0</span><br><span class="label">DÍAS</span></div>
@@ -95,58 +94,59 @@
 
     <div class="page" id="p1">
         <h2 style="font-family:'Pacifico'; color:var(--pink);">Nuestros Recuerdos</h2>
-        <button class="btn" id="btn-foto" onclick="document.getElementById('p-in').click()">SUBIR RECUERDO 📸</button>
+        <button class="btn" id="btn-foto" onclick="document.getElementById('p-in').click()">SUBIR FOTO 📸</button>
         <input type="file" id="p-in" accept="image/*" style="display:none">
-        <p id="status-foto" style="font-size:0.7rem; margin-top:5px; color:#aaa;">(Se guardará automáticamente)</p>
+        <p id="status-foto" style="font-size: 0.7rem; margin-top: 5px; opacity: 0.8;"></p>
         <div id="album" style="display: flex; flex-wrap: wrap; justify-content: center; overflow-y: auto; max-height: 60vh; width: 100%;"></div>
     </div>
 
     <div class="page" id="p2">
-        <h2 style="font-family:'Pacifico'; color:var(--pink);">Escríbeme algo...</h2>
+        <h2 style="font-family:'Pacifico'; color:var(--pink);">Nuestra Dedicatoria</h2>
         <div class="msg-box">
-            <textarea id="msg-input" placeholder="Tu mensaje aquí..." rows="3"></textarea>
-            <button class="btn" id="send-msg">ENVIAR CORAZÓN ❤️</button>
+            <textarea id="msg-input" placeholder="Escribe algo cursi aquí..." rows="3"></textarea>
+            <button class="btn" id="send-msg">GUARDAR MENSAJE ❤️</button>
         </div>
-        <div id="messages-stream" style="margin-top:20px; font-family:'Dancing Script'; font-size: 1.5rem; color: #ffccd5; max-width: 80%;"></div>
+        <div id="messages-stream" style="margin-top:20px; font-family:'Dancing Script'; font-size: 1.8rem; color: #ffccd5; max-width: 80%;"></div>
     </div>
 
     <div class="page" id="p3">
-        <h2 style="font-family:'Pacifico'; color:var(--pink);">Nuestras Canciones</h2>
-        <audio id="player" controls style="margin:20px; width: 80%;"></audio>
-        
-        <div class="msg-box" style="margin-top:0;">
-            <p style="font-size:0.8rem; margin-bottom:5px;">Pega el Link (URL) de la canción:</p>
-            <input type="text" id="music-url" placeholder="Ej: https://sitio.com/cancion.mp3">
-            <input type="text" id="music-name" placeholder="Nombre de la canción (Ej: Nuestra Boda)">
-            <button class="btn" id="add-music">AGREGAR A LA LISTA 🎵</button>
-        </div>
-        
-        <div id="songs" style="background: rgba(255,255,255,0.1); width: 300px; border-radius: 15px; max-height: 200px; overflow-y: auto; margin-top:15px;"></div>
+        <h2 style="font-family:'Pacifico'; color:var(--pink);">Playlist</h2>
+        <audio id="player" controls style="margin:20px; width:80%;"></audio>
+        <button class="btn" onclick="document.getElementById('m-in').click()">CARGAR CANCIÓN 🎵</button>
+        <input type="file" id="m-in" accept="audio/*" style="display:none">
+        <p style="font-size:0.7rem; margin-top:5px; opacity:0.7;">(Sube archivos mp3, ten paciencia al cargar)</p>
+        <div id="songs" style="background: rgba(255,255,255,0.1); width: 300px; border-radius: 15px; max-height: 200px; overflow-y: auto; margin-top: 10px;"></div>
     </div>
 
     <script type="module">
+        // Importamos Firebase desde el CDN oficial (necesario para navegadores sin bundler)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics.js";
 
-        // TUS DATOS DE FIREBASE (YA CONFIGURADOS)
+        // --- TU CONFIGURACIÓN DE FIREBASE NUEVA ---
         const firebaseConfig = {
-            apiKey: "AIzaSyAFji82Fx43sym6svAkE7u5ZKf7irC2UrE",
-            authDomain: "nuestra-fecha-16-11-2025.firebaseapp.com",
-            databaseURL: "https://nuestra-fecha-16-11-2025-default-rtdb.firebaseio.com/", 
-            projectId: "nuestra-fecha-16-11-2025",
-            storageBucket: "nuestra-fecha-16-11-2025.firebasestorage.app",
-            messagingSenderId: "443902042832",
-            appId: "1:443902042832:web:028ca83ab6ab87f8ef34d5"
+            apiKey: "AIzaSyC7GbaOLgEUI3r7tPCJlOl4qGltk3pcFMs",
+            authDomain: "nuestra-fecha-16-11-2025-5ffe1.firebaseapp.com",
+            databaseURL: "https://nuestra-fecha-16-11-2025-5ffe1-default-rtdb.firebaseio.com",
+            projectId: "nuestra-fecha-16-11-2025-5ffe1",
+            storageBucket: "nuestra-fecha-16-11-2025-5ffe1.firebasestorage.app",
+            messagingSenderId: "644385675223",
+            appId: "1:644385675223:web:9c1afd713701565eb21d92",
+            measurementId: "G-KD7D17EDJ6"
         };
+
+        // INICIALIZAMOS FIREBASE
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const analytics = getAnalytics(app);
 
         // NAVEGACIÓN
         window.show = (i) => {
             document.querySelectorAll('.page').forEach((p, idx) => p.classList.toggle('active', i === idx));
         };
 
-        // CONTADOR
+        // RELOJ
         const start = new Date('2025-11-16T00:00:00').getTime();
         setInterval(() => {
             const diff = Date.now() - start;
@@ -156,7 +156,7 @@
             document.getElementById('s').innerText = Math.floor((diff / 1000) % 60).toString().padStart(2,'0');
         }, 1000);
 
-        // ANIMACIÓN DE FONDO
+        // PARTICULAS
         const canv = document.getElementById('windCanvas');
         const ctx = canv.getContext('2d');
         let width, height;
@@ -168,32 +168,16 @@
         class Particle {
             constructor() { this.reset(); }
             reset() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.vx = Math.random() * 2 + 1;
-                this.vy = Math.random() * 1 - 0.5;
+                this.x = Math.random() * width; this.y = Math.random() * height;
+                this.vx = Math.random() * 2 + 1; this.vy = Math.random() * 1 - 0.5;
                 this.text = words[Math.floor(Math.random()*words.length)];
-                this.size = Math.random() * 15 + 10;
-                this.opacity = Math.random() * 0.5 + 0.1;
+                this.size = Math.random() * 15 + 10; this.opacity = Math.random() * 0.5 + 0.1;
             }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                if(this.x > width) this.x = -50;
-            }
-            draw() {
-                ctx.globalAlpha = this.opacity;
-                ctx.fillStyle = "#fb6f92";
-                ctx.font = `italic ${this.size}px 'Dancing Script'`;
-                ctx.fillText(this.text, this.x, this.y);
-            }
+            update() { this.x += this.vx; this.y += this.vy; if(this.x > width) this.x = -50; }
+            draw() { ctx.globalAlpha = this.opacity; ctx.fillStyle = "#fb6f92"; ctx.font = `italic ${this.size}px 'Dancing Script'`; ctx.fillText(this.text, this.x, this.y); }
         }
-        for(let i=0; i<50; i++) particles.push(new Particle());
-        function animate() {
-            ctx.clearRect(0,0,width,height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(animate);
-        }
+        for(let i=0; i<45; i++) particles.push(new Particle());
+        function animate() { ctx.clearRect(0,0,width,height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
         animate();
 
         // LETRAS
@@ -201,17 +185,14 @@
         let lyricIdx = 0;
         setInterval(() => {
             const el = document.getElementById('lyrics-display');
+            if(!el) return;
             el.style.opacity = 0;
-            setTimeout(() => {
-                el.innerText = lyrics[lyricIdx];
-                el.style.opacity = 1;
-                lyricIdx = (lyricIdx + 1) % lyrics.length;
-            }, 500);
+            setTimeout(() => { el.innerText = lyrics[lyricIdx]; el.style.opacity = 1; lyricIdx = (lyricIdx + 1) % lyrics.length; }, 500);
         }, 4000);
 
-        // ----------------------------------------------------
-        // SOLUCIÓN MÁGICA: COMPRESIÓN DE IMÁGENES
-        // ----------------------------------------------------
+        // --- FUNCIONES DE BASE DE DATOS (CON COMPRESIÓN) ---
+
+        // Función mágica para comprimir imágenes antes de subir (Evita errores de tamaño)
         const resizeImage = (file) => {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -220,14 +201,13 @@
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
                         let w = img.width, h = img.height;
-                        const max = 600; // Hacemos la foto más pequeña
+                        const max = 800; // Calidad aceptable, tamaño pequeño
                         if (w > h) { if (w > max) { h *= max / w; w = max; } } 
                         else { if (h > max) { w *= max / h; h = max; } }
                         canvas.width = w; canvas.height = h;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, w, h);
-                        // Comprimir a 0.6 calidad JPEG
-                        resolve(canvas.toDataURL('image/jpeg', 0.6));
+                        resolve(canvas.toDataURL('image/jpeg', 0.7)); // Comprimir a JPG 70%
                     };
                     img.src = e.target.result;
                 };
@@ -235,81 +215,82 @@
             });
         };
 
-        // SUBIDA DE FOTOS (Usando la base de datos directa)
+        // 1. SUBIR FOTOS (COMPRIMIDAS)
         document.getElementById('p-in').onchange = async (e) => {
             const file = e.target.files[0];
             if(!file) return;
-            
+
             const btn = document.getElementById('btn-foto');
             const status = document.getElementById('status-foto');
             
             btn.disabled = true;
-            btn.innerText = "PROCESANDO...";
-            status.innerText = "Haciendo magia para guardarla rápido...";
+            status.innerText = "Comprimiendo y subiendo foto...";
 
             try {
-                // Comprimimos la imagen antes de enviar
+                // Comprimir
                 const compressedBase64 = await resizeImage(file);
-                // La guardamos como TEXTO en la base de datos (evita usar Storage)
+                // Guardar en Firebase
                 await push(ref(db, 'fotos'), { img: compressedBase64 });
-                alert("¡Foto guardada! ❤️");
+                alert("¡Foto guardada correctamente!");
             } catch (err) {
                 console.error(err);
-                alert("Hubo un error, intenta con otra foto.");
+                alert("Error al subir. Asegúrate de haber habilitado las Reglas en Firebase.");
             } finally {
                 btn.disabled = false;
-                btn.innerText = "SUBIR RECUERDO 📸";
                 status.innerText = "";
             }
         };
 
+        // Leer fotos
         onChildAdded(ref(db, 'fotos'), (snap) => {
             const div = document.createElement('div'); div.className = 'polaroid';
             div.style.setProperty('--r', (Math.random()*10-5)+'deg');
-            div.innerHTML = `<img src="${snap.val().img}"><p style="font-size:0.7rem; text-align:center;">16-11-2025</p>`;
+            div.innerHTML = `<img src="${snap.val().img}"><p style="font-size:0.7rem; text-align:center;">Pichuchis ❤️</p>`;
             document.getElementById('album').prepend(div);
         });
 
-        // MUSICA (Versión Enlaces)
-        document.getElementById('add-music').onclick = () => {
-            const url = document.getElementById('music-url').value;
-            const name = document.getElementById('music-name').value || "Canción de Amor";
-            
-            if(url) {
-                push(ref(db, 'musica'), { name: name, src: url });
-                document.getElementById('music-url').value = '';
-                document.getElementById('music-name').value = '';
-                alert("Canción agregada a la lista 🎵");
-            } else {
-                alert("Por favor pega un enlace válido.");
-            }
-        };
-
-        onChildAdded(ref(db, 'musica'), (snap) => {
-            const data = snap.val();
-            const d = document.createElement('div');
-            d.style.padding = "10px"; d.style.cursor = "pointer"; d.style.borderBottom = "1px solid rgba(255,255,255,0.2)";
-            d.innerHTML = `🎵 ${data.name}`;
-            d.onclick = () => { 
-                player.src = data.src; 
-                player.play().catch(e => alert("No se pudo reproducir este enlace. Asegúrate que sea un archivo de audio directo.")); 
-            };
-            document.getElementById('songs').prepend(d);
-        });
-
-        // MENSAJES
+        // 2. SUBIR MENSAJES
         document.getElementById('send-msg').onclick = () => {
             const val = document.getElementById('msg-input').value;
             if(val) {
                 push(ref(db, 'mensajes'), { text: val });
                 document.getElementById('msg-input').value = '';
+                createHeart(window.innerWidth/2, window.innerHeight/2);
             }
         };
+
         onChildAdded(ref(db, 'mensajes'), (snap) => {
             const stream = document.getElementById('messages-stream');
             stream.innerText = `"${snap.val().text}"`;
+            stream.animate([{opacity:0, filter:'blur(5px)'}, {opacity:1, filter:'blur(0)'}], 1000);
         });
 
+        // 3. SUBIR MÚSICA
+        // Nota: Subimos el archivo directo a la BD. Si es muy pesado (>5MB) puede fallar.
+        document.getElementById('m-in').onchange = (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            
+            alert("Subiendo canción... Esto puede tardar unos segundos. Por favor espera.");
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                push(ref(db, 'musica'), { name: file.name, src: ev.target.result })
+                    .then(() => alert("¡Canción agregada!"))
+                    .catch(() => alert("La canción es demasiado pesada para la base de datos gratuita. Intenta con una más corta o de menor calidad."));
+            };
+            reader.readAsDataURL(file);
+        };
+
+        const player = document.getElementById('player');
+        onChildAdded(ref(db, 'musica'), (snap) => {
+            const d = document.createElement('div'); d.style.padding = "10px"; d.style.cursor = "pointer";
+            d.style.borderBottom = "1px solid rgba(255,255,255,0.1)";
+            d.innerText = "🎵 " + snap.val().name;
+            d.onclick = () => { player.src = snap.val().src; player.play(); };
+            document.getElementById('songs').prepend(d);
+        });
+
+        // EFECTOS
         window.createHeart = (x, y) => {
             const h = document.createElement('div'); h.className = 'heart';
             h.innerHTML = '❤️'; h.style.left = x+'px'; h.style.top = y+'px';
