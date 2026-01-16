@@ -49,16 +49,19 @@
         .label { font-size: 0.6rem; color: #ccc; }
 
         .msg-box { background: rgba(255,255,255,0.1); border: 1px solid var(--pink); padding: 15px; border-radius: 15px; width: 300px; margin-top: 20px; }
-        textarea { width: 100%; background: transparent; border: none; color: white; resize: none; border-bottom: 1px solid var(--pink); margin-bottom: 10px; padding: 5px; outline: none; }
+        textarea, input[type="text"] { width: 100%; background: transparent; border: none; color: white; resize: none; border-bottom: 1px solid var(--pink); margin-bottom: 10px; padding: 5px; outline: none; }
         
         .polaroid { 
             background: white; padding: 8px 8px 25px 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
             width: 130px; transform: rotate(var(--r)); margin: 10px; color: #333;
             display: inline-block; vertical-align: top;
+            transition: transform 0.3s;
         }
+        .polaroid:hover { transform: scale(1.2) rotate(0deg) !important; z-index: 100; }
         .polaroid img { width: 100%; height: 110px; object-fit: cover; }
 
         .btn { background: var(--pink); color: white; border: none; padding: 10px 20px; border-radius: 50px; cursor: pointer; font-weight: 700; }
+        .btn:disabled { background: #555; cursor: wait; }
         
         @keyframes fade { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
         .heart { position: absolute; pointer-events: none; animation: floatUp 1.5s forwards; z-index: 1000; }
@@ -92,9 +95,9 @@
 
     <div class="page" id="p1">
         <h2 style="font-family:'Pacifico'; color:var(--pink);">Nuestros Recuerdos</h2>
-        <button class="btn" onclick="document.getElementById('p-in').click()">SUBIR RECUERDO 📸</button>
+        <button class="btn" id="btn-foto" onclick="document.getElementById('p-in').click()">SUBIR RECUERDO 📸</button>
         <input type="file" id="p-in" accept="image/*" style="display:none">
-        <p style="font-size: 0.7rem; margin-top: 5px; opacity: 0.7;">(Sube fotos ligeras para que carguen rápido)</p>
+        <p id="status-foto" style="font-size:0.7rem; margin-top:5px; color:#aaa;">(Se guardará automáticamente)</p>
         <div id="album" style="display: flex; flex-wrap: wrap; justify-content: center; overflow-y: auto; max-height: 60vh; width: 100%;"></div>
     </div>
 
@@ -109,18 +112,23 @@
 
     <div class="page" id="p3">
         <h2 style="font-family:'Pacifico'; color:var(--pink);">Nuestras Canciones</h2>
-        <audio id="player" controls style="margin:20px;"></audio>
-        <button class="btn" onclick="document.getElementById('m-in').click()">CARGAR CANCIÓN 🎵</button>
-        <input type="file" id="m-in" accept="audio/*" style="display:none">
-        <p style="font-size: 0.7rem; margin-top: 5px; opacity: 0.7;">(Espera unos segundos tras elegir la canción)</p>
-        <div id="songs" style="background: rgba(255,255,255,0.1); width: 300px; border-radius: 15px; max-height: 200px; overflow-y: auto;"></div>
+        <audio id="player" controls style="margin:20px; width: 80%;"></audio>
+        
+        <div class="msg-box" style="margin-top:0;">
+            <p style="font-size:0.8rem; margin-bottom:5px;">Pega el Link (URL) de la canción:</p>
+            <input type="text" id="music-url" placeholder="Ej: https://sitio.com/cancion.mp3">
+            <input type="text" id="music-name" placeholder="Nombre de la canción (Ej: Nuestra Boda)">
+            <button class="btn" id="add-music">AGREGAR A LA LISTA 🎵</button>
+        </div>
+        
+        <div id="songs" style="background: rgba(255,255,255,0.1); width: 300px; border-radius: 15px; max-height: 200px; overflow-y: auto; margin-top:15px;"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 
-        // TUS DATOS DE FIREBASE
+        // TUS DATOS DE FIREBASE (YA CONFIGURADOS)
         const firebaseConfig = {
             apiKey: "AIzaSyAFji82Fx43sym6svAkE7u5ZKf7irC2UrE",
             authDomain: "nuestra-fecha-16-11-2025.firebaseapp.com",
@@ -148,7 +156,7 @@
             document.getElementById('s').innerText = Math.floor((diff / 1000) % 60).toString().padStart(2,'0');
         }, 1000);
 
-        // VIENTO / PARTICULAS
+        // ANIMACIÓN DE FONDO
         const canv = document.getElementById('windCanvas');
         const ctx = canv.getContext('2d');
         let width, height;
@@ -157,7 +165,6 @@
 
         let particles = [];
         const words = ["Noviembre", "2025", "Love", "Pichuchis", "16", "❤️"];
-        
         class Particle {
             constructor() { this.reset(); }
             reset() {
@@ -169,8 +176,8 @@
                 this.size = Math.random() * 15 + 10;
                 this.opacity = Math.random() * 0.5 + 0.1;
             }
-            update(audioLevel) {
-                this.x += this.vx * (1 + audioLevel * 5);
+            update() {
+                this.x += this.vx;
                 this.y += this.vy;
                 if(this.x > width) this.x = -50;
             }
@@ -182,28 +189,9 @@
             }
         }
         for(let i=0; i<50; i++) particles.push(new Particle());
-
-        // VISUALIZADOR DE AUDIO
-        let audioCtx, analyser, dataArray;
-        const player = document.getElementById('player');
-        player.onplay = () => {
-            if(!audioCtx) {
-                audioCtx = new AudioContext();
-                analyser = audioCtx.createAnalyser();
-                const src = audioCtx.createMediaElementSource(player);
-                src.connect(analyser); analyser.connect(audioCtx.destination);
-                dataArray = new Uint8Array(analyser.frequencyBinCount);
-            }
-        };
-
         function animate() {
             ctx.clearRect(0,0,width,height);
-            let level = 0;
-            if(analyser) {
-                analyser.getByteFrequencyData(dataArray);
-                level = dataArray[5] / 255;
-            }
-            particles.forEach(p => { p.update(level); p.draw(); });
+            particles.forEach(p => { p.update(); p.draw(); });
             requestAnimationFrame(animate);
         }
         animate();
@@ -221,66 +209,107 @@
             }, 500);
         }, 4000);
 
-        // --- SECCIÓN CORREGIDA DE FIREBASE ---
+        // ----------------------------------------------------
+        // SOLUCIÓN MÁGICA: COMPRESIÓN DE IMÁGENES
+        // ----------------------------------------------------
+        const resizeImage = (file) => {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width, h = img.height;
+                        const max = 600; // Hacemos la foto más pequeña
+                        if (w > h) { if (w > max) { h *= max / w; w = max; } } 
+                        else { if (h > max) { w *= max / h; h = max; } }
+                        canvas.width = w; canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        // Comprimir a 0.6 calidad JPEG
+                        resolve(canvas.toDataURL('image/jpeg', 0.6));
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        };
 
-        // FOTOS
-        document.getElementById('p-in').onchange = (e) => {
+        // SUBIDA DE FOTOS (Usando la base de datos directa)
+        document.getElementById('p-in').onchange = async (e) => {
             const file = e.target.files[0];
             if(!file) return;
-            // Aviso de carga
-            alert("Subiendo foto... Espere un momento ❤️");
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                push(ref(db, 'fotos'), { img: ev.target.result })
-                    .then(() => alert("¡Foto guardada con éxito!"))
-                    .catch((err) => alert("Error: Verifica las reglas de Firebase o sube una foto más pequeña."));
-            };
-            reader.readAsDataURL(file);
+            
+            const btn = document.getElementById('btn-foto');
+            const status = document.getElementById('status-foto');
+            
+            btn.disabled = true;
+            btn.innerText = "PROCESANDO...";
+            status.innerText = "Haciendo magia para guardarla rápido...";
+
+            try {
+                // Comprimimos la imagen antes de enviar
+                const compressedBase64 = await resizeImage(file);
+                // La guardamos como TEXTO en la base de datos (evita usar Storage)
+                await push(ref(db, 'fotos'), { img: compressedBase64 });
+                alert("¡Foto guardada! ❤️");
+            } catch (err) {
+                console.error(err);
+                alert("Hubo un error, intenta con otra foto.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "SUBIR RECUERDO 📸";
+                status.innerText = "";
+            }
         };
-        
+
         onChildAdded(ref(db, 'fotos'), (snap) => {
             const div = document.createElement('div'); div.className = 'polaroid';
             div.style.setProperty('--r', (Math.random()*10-5)+'deg');
-            div.innerHTML = `<img src="${snap.val().img}"><p style="font-size:0.7rem; text-align:center;">Recuerdos 16-11-2025 ❤️</p>`;
+            div.innerHTML = `<img src="${snap.val().img}"><p style="font-size:0.7rem; text-align:center;">16-11-2025</p>`;
             document.getElementById('album').prepend(div);
+        });
+
+        // MUSICA (Versión Enlaces)
+        document.getElementById('add-music').onclick = () => {
+            const url = document.getElementById('music-url').value;
+            const name = document.getElementById('music-name').value || "Canción de Amor";
+            
+            if(url) {
+                push(ref(db, 'musica'), { name: name, src: url });
+                document.getElementById('music-url').value = '';
+                document.getElementById('music-name').value = '';
+                alert("Canción agregada a la lista 🎵");
+            } else {
+                alert("Por favor pega un enlace válido.");
+            }
+        };
+
+        onChildAdded(ref(db, 'musica'), (snap) => {
+            const data = snap.val();
+            const d = document.createElement('div');
+            d.style.padding = "10px"; d.style.cursor = "pointer"; d.style.borderBottom = "1px solid rgba(255,255,255,0.2)";
+            d.innerHTML = `🎵 ${data.name}`;
+            d.onclick = () => { 
+                player.src = data.src; 
+                player.play().catch(e => alert("No se pudo reproducir este enlace. Asegúrate que sea un archivo de audio directo.")); 
+            };
+            document.getElementById('songs').prepend(d);
         });
 
         // MENSAJES
         document.getElementById('send-msg').onclick = () => {
             const val = document.getElementById('msg-input').value;
             if(val) {
-                push(ref(db, 'mensajes'), { text: val })
-                   .catch((err) => alert("Error al enviar mensaje: Revisa permisos"));
+                push(ref(db, 'mensajes'), { text: val });
                 document.getElementById('msg-input').value = '';
             }
         };
         onChildAdded(ref(db, 'mensajes'), (snap) => {
             const stream = document.getElementById('messages-stream');
             stream.innerText = `"${snap.val().text}"`;
-            stream.animate([{opacity:0, transform:'scale(0.8)'}, {opacity:1, transform:'scale(1)'}], 1000);
         });
 
-        // MÚSICA
-        document.getElementById('m-in').onchange = (e) => {
-            const file = e.target.files[0];
-            if(!file) return;
-            alert("Subiendo canción... Esto puede tardar si el archivo es grande 🎵");
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                push(ref(db, 'musica'), { name: file.name, src: ev.target.result })
-                    .then(() => alert("¡Canción agregada!"))
-                    .catch((err) => alert("Error: Archivo muy pesado o sin permisos."));
-            };
-            reader.readAsDataURL(file);
-        };
-        onChildAdded(ref(db, 'musica'), (snap) => {
-            const d = document.createElement('div'); d.style.padding = "10px"; d.style.cursor = "pointer"; d.style.borderBottom = "1px solid rgba(255,255,255,0.2)";
-            d.innerText = "🎵 " + snap.val().name;
-            d.onclick = () => { player.src = snap.val().src; player.play(); };
-            document.getElementById('songs').prepend(d);
-        });
-
-        // CORAZONES
         window.createHeart = (x, y) => {
             const h = document.createElement('div'); h.className = 'heart';
             h.innerHTML = '❤️'; h.style.left = x+'px'; h.style.top = y+'px';
