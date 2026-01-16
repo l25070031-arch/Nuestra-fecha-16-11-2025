@@ -17,7 +17,6 @@
             color: white;
         }
 
-        /* Fondo de Snoopy con mezcla oscura para que resalten las partículas */
         .snoopy-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://w0.peakpx.com/wallpaper/599/238/HD-wallpaper-snoopy-love-dog-heart-pink-thumbnail.jpg');
@@ -42,22 +41,20 @@
         }
         .page.active { display: flex; animation: fade 0.8s ease; }
 
-        /* Estilo letras de "Viento" */
         .lyrics-container { font-family: 'Dancing Script', cursive; font-size: 2.2rem; color: var(--pink); min-height: 150px; text-shadow: 0 0 15px rgba(251,111,146,0.5); }
         
-        /* Widgets */
         .timer { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 20px; border: 1px solid var(--pink); backdrop-filter: blur(5px); margin-bottom: 20px; }
         .grid { display: flex; gap: 15px; }
         .num { font-size: 1.8rem; font-weight: 700; color: var(--pink); }
         .label { font-size: 0.6rem; color: #ccc; }
 
-        /* Dedicatoria */
         .msg-box { background: rgba(255,255,255,0.1); border: 1px solid var(--pink); padding: 15px; border-radius: 15px; width: 300px; margin-top: 20px; }
         textarea { width: 100%; background: transparent; border: none; color: white; resize: none; border-bottom: 1px solid var(--pink); margin-bottom: 10px; padding: 5px; outline: none; }
         
         .polaroid { 
             background: white; padding: 8px 8px 25px 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
             width: 130px; transform: rotate(var(--r)); margin: 10px; color: #333;
+            display: inline-block; vertical-align: top;
         }
         .polaroid img { width: 100%; height: 110px; object-fit: cover; }
 
@@ -97,6 +94,7 @@
         <h2 style="font-family:'Pacifico'; color:var(--pink);">Nuestros Recuerdos</h2>
         <button class="btn" onclick="document.getElementById('p-in').click()">SUBIR RECUERDO 📸</button>
         <input type="file" id="p-in" accept="image/*" style="display:none">
+        <p style="font-size: 0.7rem; margin-top: 5px; opacity: 0.7;">(Sube fotos ligeras para que carguen rápido)</p>
         <div id="album" style="display: flex; flex-wrap: wrap; justify-content: center; overflow-y: auto; max-height: 60vh; width: 100%;"></div>
     </div>
 
@@ -110,10 +108,11 @@
     </div>
 
     <div class="page" id="p3">
-        <h2 style="font-family:'Pacifico'; color:var(--pink);">Nuestras  Canciones</h2>
+        <h2 style="font-family:'Pacifico'; color:var(--pink);">Nuestras Canciones</h2>
         <audio id="player" controls style="margin:20px;"></audio>
         <button class="btn" onclick="document.getElementById('m-in').click()">CARGAR CANCIÓN 🎵</button>
         <input type="file" id="m-in" accept="audio/*" style="display:none">
+        <p style="font-size: 0.7rem; margin-top: 5px; opacity: 0.7;">(Espera unos segundos tras elegir la canción)</p>
         <div id="songs" style="background: rgba(255,255,255,0.1); width: 300px; border-radius: 15px; max-height: 200px; overflow-y: auto;"></div>
     </div>
 
@@ -121,7 +120,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 
-        // CONFIGURACIÓN FIREBASE
+        // TUS DATOS DE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAFji82Fx43sym6svAkE7u5ZKf7irC2UrE",
             authDomain: "nuestra-fecha-16-11-2025.firebaseapp.com",
@@ -149,7 +148,7 @@
             document.getElementById('s').innerText = Math.floor((diff / 1000) % 60).toString().padStart(2,'0');
         }, 1000);
 
-        // --- SISTEMA DE VIENTO REVISADO ---
+        // VIENTO / PARTICULAS
         const canv = document.getElementById('windCanvas');
         const ctx = canv.getContext('2d');
         let width, height;
@@ -184,7 +183,7 @@
         }
         for(let i=0; i<50; i++) particles.push(new Particle());
 
-        // AUDIO VISUALIZER
+        // VISUALIZADOR DE AUDIO
         let audioCtx, analyser, dataArray;
         const player = document.getElementById('player');
         player.onplay = () => {
@@ -209,7 +208,7 @@
         }
         animate();
 
-        // LETRAS DINÁMICAS (VIENTO)
+        // LETRAS
         const lyrics = ["Préstame tu peine", "Y péiname el alma", "Desenrédame", "Fuera de este mundo", "Viento amárranos", "Tiempo detente muchos años"];
         let lyricIdx = 0;
         setInterval(() => {
@@ -222,24 +221,36 @@
             }, 500);
         }, 4000);
 
-        // FIREBASE: FOTOS
+        // --- SECCIÓN CORREGIDA DE FIREBASE ---
+
+        // FOTOS
         document.getElementById('p-in').onchange = (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            // Aviso de carga
+            alert("Subiendo foto... Espere un momento ❤️");
             const reader = new FileReader();
-            reader.onload = (ev) => push(ref(db, 'fotos'), { img: ev.target.result });
-            reader.readAsDataURL(e.target.files[0]);
+            reader.onload = (ev) => {
+                push(ref(db, 'fotos'), { img: ev.target.result })
+                    .then(() => alert("¡Foto guardada con éxito!"))
+                    .catch((err) => alert("Error: Verifica las reglas de Firebase o sube una foto más pequeña."));
+            };
+            reader.readAsDataURL(file);
         };
+        
         onChildAdded(ref(db, 'fotos'), (snap) => {
             const div = document.createElement('div'); div.className = 'polaroid';
             div.style.setProperty('--r', (Math.random()*10-5)+'deg');
-            div.innerHTML = `<img src="${snap.val().img}"><p style="font-size:0.7rem; text-align:center;">Recuerdos que los llevo tatuado en el alma como llevo la fecha 16-11-2025, Te amooo mi Pichuchis ❤️</p>`;
+            div.innerHTML = `<img src="${snap.val().img}"><p style="font-size:0.7rem; text-align:center;">Recuerdos 16-11-2025 ❤️</p>`;
             document.getElementById('album').prepend(div);
         });
 
-        // FIREBASE: DEDICATORIAS
+        // MENSAJES
         document.getElementById('send-msg').onclick = () => {
             const val = document.getElementById('msg-input').value;
             if(val) {
-                push(ref(db, 'mensajes'), { text: val });
+                push(ref(db, 'mensajes'), { text: val })
+                   .catch((err) => alert("Error al enviar mensaje: Revisa permisos"));
                 document.getElementById('msg-input').value = '';
             }
         };
@@ -249,21 +260,27 @@
             stream.animate([{opacity:0, transform:'scale(0.8)'}, {opacity:1, transform:'scale(1)'}], 1000);
         });
 
-        // FIREBASE: MÚSICA
+        // MÚSICA
         document.getElementById('m-in').onchange = (e) => {
             const file = e.target.files[0];
+            if(!file) return;
+            alert("Subiendo canción... Esto puede tardar si el archivo es grande 🎵");
             const reader = new FileReader();
-            reader.onload = (ev) => push(ref(db, 'musica'), { name: file.name, src: ev.target.result });
+            reader.onload = (ev) => {
+                push(ref(db, 'musica'), { name: file.name, src: ev.target.result })
+                    .then(() => alert("¡Canción agregada!"))
+                    .catch((err) => alert("Error: Archivo muy pesado o sin permisos."));
+            };
             reader.readAsDataURL(file);
         };
         onChildAdded(ref(db, 'musica'), (snap) => {
-            const d = document.createElement('div'); d.style.padding = "10px"; d.style.cursor = "pointer";
+            const d = document.createElement('div'); d.style.padding = "10px"; d.style.cursor = "pointer"; d.style.borderBottom = "1px solid rgba(255,255,255,0.2)";
             d.innerText = "🎵 " + snap.val().name;
             d.onclick = () => { player.src = snap.val().src; player.play(); };
             document.getElementById('songs').prepend(d);
         });
 
-        // EFECTO CORAZONES
+        // CORAZONES
         window.createHeart = (x, y) => {
             const h = document.createElement('div'); h.className = 'heart';
             h.innerHTML = '❤️'; h.style.left = x+'px'; h.style.top = y+'px';
